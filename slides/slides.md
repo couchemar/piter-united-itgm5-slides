@@ -2,7 +2,7 @@
 
 ---
 
-# Nix -- это:
+# Nix — это:
 
 1. Пакетный менеджер:
     * Атомарные операции
@@ -47,21 +47,22 @@
 ---
 
 # Сборка и установка
-$ nix-build '<nixpkgs>' -A hello
-/nix/store/anndcyxqp5i7wih6bccbdmgw87nh6xgm-hello-2.10
 
-$ ls -l result
-result -> /nix/store/anndcyxqp5i7wih6bccbdmgw87nh6xgm-hello-2.10
+# Собираем
 
-$ ./result/bin/hello
-Hello, world!
+    $ nix-build '<nixpkgs>' -A hello
+    /nix/store/anndcyxqp5i7wih6bccbdmgw87nh6xgm-hello-2.10
+    $ ls -l result
+    result -> /nix/store/anndcyxqp5i7wih6bccbdmgw87nh6xgm-hello-2.10
+    $ ./result/bin/hello
+    Hello, world!
 
+# Устанавливаем
 
-$ nix-env -i hello
-installing ‘hello-2.10’
-
-$ hello
-Hello, world!
+    $ nix-env -i hello
+    installing ‘hello-2.10’
+    $ hello
+    Hello, world!
 
 ---
 
@@ -72,104 +73,117 @@ Hello, world!
 # virtualenv
 
 - Требуется дополнительное описание или скриптование установки не python-зависимостей.
-- Сложность контроля за тем что все участники команды используют одни и теже версии зависимостей.
+- Сложность контроля за тем что все участники команды используют одни и те же версии зависимостей.
 - Необходимость использовать новое окружение под каждый набор зависимостей.
 - Все усложняется если появляются зависимости между разрабатываемыми библиотеками.
 
 ---
 
-# nix-shell -- virtualenv для всего
+# nix-shell — virtualenv для всего
 
-Создается на лету
-$ nix-shell -p pythonPackages.python git libxml2 pythonPackages.tornado
-$ python -c 'import tornado; print tornado.version'
-4.1
+# Создается на лету
 
-Изолированное окружение
-$ nix-shell -p pypy --pure
-$ less
-The program ‘less’ is currently not installed. It is provided by
-several packages. You can install it by typing one of the following:
-  nix-env -i busybox
-  nix-env -i less
+    $ nix-shell -p pythonPackages.python git libxml2 pythonPackages.tornado
+    $ python -c 'import tornado; print tornado.version'
+    4.1
 
-$ nix-shell '<nixpkgs>' -A pythonPackages.tornado
-$ unpackPhase
-$ cd tornado-4.1/
-$ ./runtests.sh
+# Изолированное окружение
 
----
+    $ nix-shell -p pypy --pure
+    $ less
+    The program ‘less’ is currently not installed. It is provided by
+    several packages. You can install it by typing one of the following:
+      nix-env -i busybox
+      nix-env -i less
 
-$ cat web_math/run.py
-# coding: utf-8
+# Устанавливаются зависимости необходимые для сборки
 
-from tornado import ioloop, web, version
-import my_math
-
-
-class PlusHandler(web.RequestHandler):
-    def get(self, a, b):
-        self.write({'result': my_math.plus(int(a), int(b))})
-
-
-app = web.Application([
-    (r'/plus/(\d+)/(\d+)', PlusHandler)
-])
-
-
-if __name__ == '__main__':
-    print "Hey I'm Tornado version: ", version
-    app.listen(9999)
-    ioloop.IOLoop.instance().start()
-
+    $ nix-shell '<nixpkgs>' -A pythonPackages.tornado
+    $ unpackPhase
+    $ cd tornado-4.1/
+    $ ./runtests.sh
 
 ---
 
-$ cat web_math/default.nix
-{
-  pythonPackages ? (import <nixpkgs> {}).pythonPackages,
-  tornado ? pythonPackages.tornado_3,
-  my-math ? import ../my_math {inherit pythonPackages;}
-}:
+# Приложение web_math
 
-pythonPackages.buildPythonPackage {
-   name = "web_math";
-   src = ./.;
+# web_math/run.py
 
-   buildInputs = [ tornado my-math ];
-}
+    !python
+    from tornado import ioloop, web, version
+    import my_math
 
+    class PlusHandler(web.RequestHandler):
+        def get(self, a, b):
+            self.write({'result': my_math.plus(int(a), int(b))})
 
----
+    app = web.Application([
+        (r'/plus/(\d+)/(\d+)', PlusHandler)
+    ])
 
-$ cat my_math/my_math/__init__.py 
-# coding: utf-8
-
-def plus(a, b):
-    return a + b
-
-$ cat my_math/default.nix
-{ pythonPackages }:
-
-pythonPackages.buildPythonPackage {
-  name = "my-math";
-  src = ./.;
-}
-
-
-$ nix-shell
-$ python run.py 
-Hey I'm Tornado version:  3.2.2
-$ curl http://localhost:9999/plus/7/5
-{"result": 12}
-
-$ nix-shell --arg tornado 'with import <nixpkgs> {}; pythonPackages.tornado'
-$ python run.py 
-Hey I'm Tornado version:  4.1
+    if __name__ == '__main__':
+        print "Hey I'm Tornado version: ", version
+        app.listen(9999)
+        ioloop.IOLoop.instance().start()
 
 ---
 
-$ cat my_math/my_math/__init__.py 
+# "Упакуем"
+
+# web_math/default.nix
+
+    !nix
+    {
+      pythonPackages ? (import <nixpkgs> {}).pythonPackages,
+      tornado ? pythonPackages.tornado_3,
+      my-math ? import ../my_math {inherit pythonPackages;}
+    }:
+    pythonPackages.buildPythonPackage {
+      name = "web_math";
+      src = ./.;
+      buildInputs = [ tornado my-math ];
+    }
+
+---
+
+# Очень важная библиотека
+
+# my_math/my_math/__init__.py
+
+    !python
+    def plus(a, b):
+        return a + b
+
+# my_math/default.nix
+
+    !nix
+    { pythonPackages }:
+    pythonPackages.buildPythonPackage {
+      name = "my-math";
+      src = ./.;
+    }
+
+---
+
+# Создадим окружение
+
+# По-умолчанию
+
+    $ nix-shell
+    $ python run.py
+    Hey I'm Tornado version:  3.2.2
+    $ curl http://localhost:9999/plus/7/5
+    {"result": 12}
+
+# Использую более свежий Tornado
+
+    $ nix-shell --arg tornado 'with import <nixpkgs> {}; pythonPackages.tornado'
+    $ python run.py
+    Hey I'm Tornado version:  4.1
+
+---
+
+$ cat my_math/my_math/__init__.py
 # coding: utf-8
 import numpy
 
@@ -178,8 +192,8 @@ def plus(*args):
 
 
 $ cat my_math/default.nix
-{ 
-  pythonPackages, 
+{
+  pythonPackages,
   numpy ? pythonPackages.numpy
 }:
 
@@ -199,10 +213,7 @@ $ nix-shell --arg pythonPackages '(import <nixpkgs> {}).pypyPackages'
 
 $ nix-shell --arg pythonPackages '(import <nixpkgs> {}).pypyPackages' \
             --arg tornado '(import <nixpkgs> {}).pypyPackages.tornado'
-$ pypy run.py 
+$ pypy run.py
 Hey I'm Tornado version:  4.1
 $ curl http://localhost:9999/plus/17/25
 {"result": 42}
-
-
-
