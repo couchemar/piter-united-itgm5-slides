@@ -2,7 +2,8 @@ let pkgs = import <nixpkgs> {}; in
 
 { stdenv ? pkgs.stdenv,
   fetchurl ? pkgs.fetchurl,
-  pythonPackages ? pkgs.pythonPackages }:
+  pythonPackages ? pkgs.pythonPackages,
+  chromium ? pkgs.chromium }:
 
 let
   landslide = pythonPackages.buildPythonPackage rec {
@@ -30,8 +31,12 @@ in
     buildPhase = ''
     ${landslide}/bin/landslide $src/slides.md
     '';
+
     installPhase = ''
-    cp presentation.html $out
+    mkdir $out/
+    cp presentation.html $out/
+
+    echo "${chromium}/bin/chromium --incognito $out/presentation.html" >> $out/run
     '';
   }
 
