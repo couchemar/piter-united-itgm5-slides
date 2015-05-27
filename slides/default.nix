@@ -3,7 +3,8 @@ let pkgs = import <nixpkgs> {}; in
 { stdenv ? pkgs.stdenv,
   fetchurl ? pkgs.fetchurl,
   pythonPackages ? pkgs.pythonPackages,
-  chromium ? pkgs.chromium }:
+  chromium ? pkgs.chromium,
+  strings ? pkgs.lib.strings }:
 
 let
   landslide = pythonPackages.buildPythonPackage rec {
@@ -22,6 +23,9 @@ let
       six
     ];
   };
+
+  readPythonSources = file: strings.concatStringsSep "\n    " (
+      strings.splitString "\n" (builtins.readFile file));
 in
   stdenv.mkDerivation rec {
     version = "0.0.1";
@@ -29,7 +33,8 @@ in
     src = ./.;
 
     buildPhase = ''
-    ${landslide}/bin/landslide $src/slides.md
+    substituteAll $src/slides.md slides.md
+    ${landslide}/bin/landslide slides.md
     '';
 
     installPhase = ''
