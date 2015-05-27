@@ -146,7 +146,7 @@ Derivation («Вывод», «Деривация») – описание дей�
 
 ---
 
-# "Упакуем"
+# Упакуем
 
 # web_math/default.nix
 
@@ -201,37 +201,48 @@ Derivation («Вывод», «Деривация») – описание дей�
 
 ---
 
-$ cat my_math/my_math/__init__.py
-# coding: utf-8
-import numpy
+# Улучшенная версия
 
-def plus(*args):
-    return numpy.sum(args)
+# my_math/my_math/__init__.py
+
+    !python
+    import numpy
+
+    def plus(*args):
+        return numpy.sum(args)
 
 
-$ cat my_math/default.nix
-{
-  pythonPackages,
-  numpy ? pythonPackages.numpy
-}:
+# my_math/default.nix
 
-pythonPackages.buildPythonPackage {
-  name = "my-math";
-  src = ./.;
-  propagatedBuildInputs = [ numpy ];
-}
+    !nix
+    {
+      pythonPackages,
+      numpy ? pythonPackages.numpy
+    }:
+
+    pythonPackages.buildPythonPackage {
+      name = "my-math";
+      src = ./.;
+      propagatedBuildInputs = [ numpy ];
+    }
 
 $ nix-shell --arg my-math 'with import <nixpkgs> {}; callPackage ../my_math2 {}'
 
 ---
 
-$ nix-shell --arg pythonPackages '(import <nixpkgs> {}).python3Packages'
+# Другие версии Python
 
-$ nix-shell --arg pythonPackages '(import <nixpkgs> {}).pypyPackages'
+# Python3 (жалко что работать не будет)
 
-$ nix-shell --arg pythonPackages '(import <nixpkgs> {}).pypyPackages' \
-            --arg tornado '(import <nixpkgs> {}).pypyPackages.tornado'
-$ pypy run.py
-Hey I'm Tornado version:  4.1
-$ curl http://localhost:9999/plus/17/25
-{"result": 42}
+    $ nix-shell --arg pythonPackages '(import <nixpkgs> {}).python3Packages'
+
+# Или даже PyPy
+    
+    $ nix-shell --arg pythonPackages '(import <nixpkgs> {}).pypyPackages'
+
+    $ nix-shell --arg pythonPackages '(import <nixpkgs> {}).pypyPackages' \
+                --arg tornado '(import <nixpkgs> {}).pypyPackages.tornado'
+    $ pypy run.py
+    Hey I'm Tornado version:  4.1
+    $ curl http://localhost:9999/plus/17/25
+    {"result": 42}
