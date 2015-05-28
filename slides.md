@@ -128,21 +128,7 @@ Derivation («Вывод», «Деривация») – описание дей�
 # web_math/run.py
 
     !python
-    from tornado import ioloop, web, version
-    import my_math
-
-    class PlusHandler(web.RequestHandler):
-        def get(self, a, b):
-            self.write({'result': my_math.plus(int(a), int(b))})
-
-    app = web.Application([
-        (r'/plus/(\d+)/(\d+)', PlusHandler)
-    ])
-
-    if __name__ == '__main__':
-        print "Hey I'm Tornado version: ", version
-        app.listen(9999)
-        ioloop.IOLoop.instance().start()
+    @web_math_run_py@
 
 ---
 
@@ -151,16 +137,7 @@ Derivation («Вывод», «Деривация») – описание дей�
 # web_math/default.nix
 
     !nix
-    {
-      pythonPackages ? (import <nixpkgs> {}).pythonPackages,
-      tornado ? pythonPackages.tornado_3,
-      my-math ? import ../my_math {inherit pythonPackages;}
-    }:
-    pythonPackages.buildPythonPackage {
-      name = "web_math";
-      src = ./.;
-      buildInputs = [ tornado my-math ];
-    }
+    @web_math_default_nix@
 
 ---
 
@@ -169,17 +146,12 @@ Derivation («Вывод», «Деривация») – описание дей�
 # my_math/my_math/__init__.py
 
     !python
-    def plus(a, b):
-        return a + b
+    @my_math_init_py@
 
 # my_math/default.nix
 
     !nix
-    { pythonPackages }:
-    pythonPackages.buildPythonPackage {
-      name = "my-math";
-      src = ./.;
-    }
+    @my_math_default_nix@
 
 ---
 
@@ -203,28 +175,15 @@ Derivation («Вывод», «Деривация») – описание дей�
 
 # Улучшенная версия
 
-# my_math/my_math/__init__.py
+# my_math2/my_math/__init_.py
 
     !python
-    import numpy
+    @my_math2_init_py@
 
-    def plus(*args):
-        return numpy.sum(args)
-
-
-# my_math/default.nix
+# my_math2/default.nix
 
     !nix
-    {
-      pythonPackages,
-      numpy ? pythonPackages.numpy
-    }:
-
-    pythonPackages.buildPythonPackage {
-      name = "my-math";
-      src = ./.;
-      propagatedBuildInputs = [ numpy ];
-    }
+    @my_math2_default_nix@
 
 $ nix-shell --arg my-math 'with import <nixpkgs> {}; callPackage ../my_math2 {}'
 
