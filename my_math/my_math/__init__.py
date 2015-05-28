@@ -1,4 +1,3 @@
-# coding: utf-8
-
-def plus(a, b):
-    return a + b
+from operator import add
+def plus(*args):
+    return reduce(add, args)

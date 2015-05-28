@@ -162,10 +162,10 @@ Derivation («Вывод», «Деривация») – описание дей�
     $ nix-shell
     $ python run.py
     Hey I'm Tornado version:  3.2.2
-    $ curl http://localhost:9999/plus/7/5
+    $ curl "http://localhost:9999/plus?a=1&b=2&c=3"
     {"result": 12}
 
-# Использую более свежий Tornado
+# Используем более свежий Tornado
 
     $ nix-shell --arg tornado 'with import <nixpkgs> {}; pythonPackages.tornado'
     $ python run.py
@@ -185,8 +185,10 @@ Derivation («Вывод», «Деривация») – описание дей�
     !nix
     @my_math2_default_nix@
 
-$ nix-shell --arg my-math 'with import <nixpkgs> {}; callPackage ../my_math2 {}'
-
+###
+    $ nix-shell --arg my-math 'with import <nixpkgs> {}; callPackage ../my_math2 {}'
+    $ curl "http://localhost:9999/plus?a=1&b=2&c=3"
+    {"result": 12}
 ---
 
 # Другие версии Python
@@ -203,5 +205,5 @@ $ nix-shell --arg my-math 'with import <nixpkgs> {}; callPackage ../my_math2 {}'
                 --arg tornado '(import <nixpkgs> {}).pypyPackages.tornado'
     $ pypy run.py
     Hey I'm Tornado version:  4.1
-    $ curl http://localhost:9999/plus/17/25
+    $ curl "http://localhost:9999/plus?a=10&b=12&c=13&d=7"
     {"result": 42}
