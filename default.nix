@@ -41,7 +41,7 @@ in
 
     buildPhase = ''
     substituteAll $src/slides.md slides.md
-    ${landslide}/bin/landslide slides.md
+    ${landslide}/bin/landslide --linenos=no --theme=ribbon slides.md
     '';
 
     installPhase = ''
