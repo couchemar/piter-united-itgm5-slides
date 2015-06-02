@@ -5,6 +5,8 @@
 
 ----
 
+:id: title-slide
+
 Пакетный менеджер Nix в качестве замены virtualenv
 ==================================================
 
@@ -321,6 +323,8 @@ Nix – единый менеджер пакетов
 .. _github.com/couchemar/piter-united-itgm5-slides: https://github.com/couchemar/piter-united-itgm5-slides
 
 ----
+
+:id: end-slide
 
 Спасибо
 =======
