@@ -290,8 +290,10 @@ Nix – единый менеджер пакетов
 * Java
 * И другие
 
-И даже эта презентация подготовлена с помощью Nix
-[github.com/couchemar/piter-united-itgm5-slides](https://github.com/couchemar/piter-united-itgm5-slides)
+И даже эта презентация подготовлена с помощью Nix:
+`github.com/couchemar/piter-united-itgm5-slides`_.
+
+.. _github.com/couchemar/piter-united-itgm5-slides: https://github.com/couchemar/piter-united-itgm5-slides
 
 ----
 
