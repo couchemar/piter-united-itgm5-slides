@@ -20,3 +20,7 @@ div#title-slide, div#end-slide, div#nix-title-slide {
 #title-slide h2 {
     color: #464451;
 }
+
+.highlight {
+    font-size: 160%
+}
